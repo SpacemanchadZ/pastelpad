@@ -37,11 +37,11 @@
 
   /* ---------------- your Doodles in the room ---------------- */
   const guests = []; // { id, src, x, bottom, size, phase, hopAt, dragged }
-  let savedIds = []; try { savedIds = JSON.parse(localStorage.getItem("pastelpad.roomGuests") || "[]"); } catch {}
-  const saveIds = () => { try { localStorage.setItem("pastelpad.roomGuests", JSON.stringify(guests.map((g) => g.id))); } catch {} };
+  let savedIds = []; try { savedIds = JSON.parse(localStorage.getItem("pastelpad.roomGuests2") || "[]"); } catch {}
+  const saveIds = () => { try { localStorage.setItem("pastelpad.roomGuests2", JSON.stringify(guests.filter((g) => !g.auto).map((g) => g.id))); } catch {} };
   const loading = new Set();
 
-  async function addGuest(id, quiet) {
+  async function addGuest(id, quiet, auto) {
     id = Number(id);
     if (!Number.isInteger(id) || id < 0 || id > MAX_ID) { if (!quiet) toast(`Doodle numbers go from 0 to ${MAX_ID}`); return; }
     if (guests.some((g) => g.id === id) || loading.has(id)) { if (!quiet) toast(`#${id} is already in the room`); return; }
@@ -51,7 +51,7 @@
       let src;
       if (state.id === id && (state.cut || state.img)) src = state.cut || state.img;
       else { const meta = await getMeta(id); const img = await loadImage(meta); src = cutout(img).cut || img; }
-      const g = { id, src, phase: Math.random() * TAU, hopAt: 3 + Math.random() * 6, dragged: false };
+      const g = { id, auto: !!auto, src, phase: Math.random() * TAU, hopAt: 3 + Math.random() * 6, dragged: false };
       guests.push(g); placeGuests(); saveIds();
       if (!quiet) toast(`#${id} joined the room`);
     } catch { if (!quiet) toast(`Couldn't load #${id}. Try again in a moment.`); }
@@ -299,12 +299,16 @@
   // Your current Doodle joins automatically; saved guests come back too
   document.addEventListener("pp:found", (e) => {
     const id = e.detail.id;
-    const onlyAuto = guests.length === 1 && guests[0].auto;
-    if (!guests.length || onlyAuto) {
-      if (onlyAuto && guests[0].id === id) return redrawPreviews();
-      guests.length = 0;
-      addGuest(id, true).then(() => { const g = guests.find((x) => x.id === id); if (g) g.auto = true; });
-    } else redrawPreviews();
+    // your Doodle is always in the rooms: it takes the place of the last one you looked up
+    if (guests.some((g) => g.id === id)) return redrawPreviews();
+    const old = guests.findIndex((g) => g.auto);
+    if (old >= 0) guests.splice(old, 1);
+    if (guests.length >= 3) guests.pop();
+    addGuest(id, true, true).then(() => {
+      const i = guests.findIndex((x) => x.id === id);
+      if (i >= 0) { guests.unshift(guests.splice(i, 1)[0]); placeGuests(true); }
+      redrawPreviews();
+    });
   });
   (async () => { for (const id of savedIds.slice(0, 3)) await addGuest(id, true); redrawPreviews(); })();
   redrawPreviews();

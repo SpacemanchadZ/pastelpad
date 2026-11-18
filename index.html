@@ -4,8 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pastel Pad</title>
+<meta name="description" content="Look up your Doodle, dress it up and hang out in cozy rooms.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pastelpad.com/">
+<meta property="og:title" content="Pastel Pad">
+<meta property="og:description" content="Look up your Doodle, dress it up and hang out in cozy rooms.">
+<meta property="og:image" content="https://pastelpad.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pastel Pad">
+<meta name="twitter:description" content="Look up your Doodle, dress it up and hang out in cozy rooms.">
+<meta name="twitter:image" content="https://pastelpad.com/og-image.png">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="fun.css?v=1795023639">
+<link rel="stylesheet" href="fun.css?v=1795036431">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito:wght@400;600;800&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap">
@@ -154,7 +166,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 2px solid var(--lin
   background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 700; z-index: 20; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
-<link rel="stylesheet" href="bold.css?v=1795023639">
+<link rel="stylesheet" href="bold.css?v=1795036431">
 </head>
 <body>
 <div class="wrap">
@@ -211,7 +223,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 2px solid var(--lin
       </label>
       <button class="btn ghost" type="button" id="randomBtn">Surprise me</button>
     </form>
-    <p class="hint" id="status">Showing Doodle #1 as an example. Type your own number above.</p>
+    <p class="hint" id="status">Showing Doodle #4968 as an example. Type your own number above.</p>
     </div>
     </div>
     <div class="hero-art" id="heroArt" aria-hidden="true"></div>
@@ -227,7 +239,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 2px solid var(--lin
       </div>
       <div class="card info" id="infoCard">
         <div class="title-row">
-          <h2 id="name">Doodle #1</h2>
+          <h2 id="name">Doodle #4968</h2>
           <button class="chip" type="button" id="saveBtn" aria-pressed="false">♡ Save to my shelf</button>
         </div>
         <div class="rank" id="rankBox" hidden>
@@ -345,7 +357,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 2px solid var(--lin
   </footer>
 </div>
 <div class="toast" id="toast" hidden></div>
-<script src="rarity.js?v=1795023639"></script>
+<script src="rarity.js?v=1795036431"></script>
 
 <script>
 const CONTRACT = "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e";
@@ -417,8 +429,9 @@ async function show(id, { quiet } = {}) {
     const img = await loadImage(meta);
     Object.assign(state, { id, meta, img }, cutout(img));
     renderInfo(); draw();
+    if (!quiet) store("pastelpad.myDoodle", id);
     emit("found", { id, quiet: !!quiet });
-    setStatus(quiet ? "Showing Doodle #1 as an example. Type your own number above." : `Found Doodle #${id}.`);
+    setStatus(quiet ? "Showing Doodle #4968 as an example. Type your own number above." : `Found Doodle #${id}.`);
     // (the address bar stays clean: no #number added)
   } catch (e) {
     setStatus("Couldn't reach the image servers just now. Check your connection and press Find it again.", true);
@@ -822,16 +835,17 @@ buildControls(); draw(); renderShelf();
 const d = dayId(); $("dayTitle").textContent = `Doodle of the Day: #${d}`;
 getMeta(d).then((m) => { setDoodleImg($("dayImg"), m); $("dayImg").alt = `Doodle #${d}`; }).catch(() => {});
 const start = location.hash.slice(1);
-if (/^\d+$/.test(start)) show(start); else show(1, { quiet: true });
+const mine = load("pastelpad.myDoodle", null);
+if (/^\d+$/.test(start)) show(start); else if (Number.isInteger(mine)) show(mine); else show(4968, { quiet: true });
 if (document.fonts) document.fonts.ready.then(draw);
 </script>
-<script src="personality.js?v=1795023639"></script>
-<script src="fun.js?v=1795023639"></script>
-<script src="explore.js?v=1795023639"></script>
-<script src="hero.js?v=1795023639"></script>
-<script src="music.js?v=1795023639"></script>
-<script src="scenes.js?v=1795023639"></script>
-<script src="rooms.js?v=1795023639"></script>
-<script src="nav.js?v=1795023639"></script>
+<script src="personality.js?v=1795036431"></script>
+<script src="fun.js?v=1795036431"></script>
+<script src="explore.js?v=1795036431"></script>
+<script src="hero.js?v=1795036431"></script>
+<script src="music.js?v=1795036431"></script>
+<script src="scenes.js?v=1795036431"></script>
+<script src="rooms.js?v=1795036431"></script>
+<script src="nav.js?v=1795036431"></script>
 </body>
 </html>
