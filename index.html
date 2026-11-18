@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pastel Pad</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fun.css?v=1795023639">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito:wght@400;600;800&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap">
+<style>
+/* Layout: pastel "studio" — search bar up top, big Doodle on the left, wardrobe controls on the right, saved shelf below */
+:root {
+  --bg: #fbf7ff;
+  --surface: #ffffff;
+  --ink: #2b2540;
+  --muted: #6e6787;
+  --line: #e7e0f3;
+  --accent: #7b5cff;
+  --accent-ink: #ffffff;
+  --pink: #ffc8e1;
+  --mint: #c6f2dc;
+  --sky: #c9e4ff;
+  --butter: #fff1b8;
+  --danger: #c2335b;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Nunito", "Avenir", system-ui, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17142a; --surface: #221e39; --ink: #f2eeff; --muted: #a9a2c6; --line: #352f55;
+    --accent: #a48cff; --accent-ink: #17142a; --danger: #ff7a9c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17142a; --surface: #221e39; --ink: #f2eeff; --muted: #a9a2c6; --line: #352f55;
+  --accent: #a48cff; --accent-ink: #17142a; --danger: #ff7a9c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 48px; display: grid; gap: 28px; }
+img { max-width: 100%; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Header */
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { width: 64px; height: 64px; flex: none; overflow: visible; transform-origin: 50% 90%; animation: sway 5s ease-in-out infinite; }
+.logo .logo-eyes { transform-origin: 50px 62px; animation: blink 4.5s infinite; }
+.logo .logo-spark { transform-origin: 86px 22px; animation: twinkle 2.4s ease-in-out infinite; }
+.brand:hover .logo { animation: hop .5s ease; }
+@keyframes sway { 50% { transform: rotate(-4deg); } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@keyframes twinkle { 50% { transform: scale(.6) rotate(45deg); } }
+@keyframes hop { 40% { transform: translateY(-8px) rotate(-6deg); } 70% { transform: translateY(0) scale(1.06, .94); } }
+.wordmark span { display: inline-block; background: #2b2540; color: #fff; border-radius: 12px; padding: 0 .28em .06em; transform: rotate(-4deg); margin-left: .05em; }
+:root[data-theme="dark"] .wordmark span { background: var(--accent); color: var(--accent-ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wordmark span { background: var(--accent); color: var(--accent-ink); } }
+h1 { font: 800 clamp(1.8rem, 4vw, 2.4rem)/1 var(--display); margin: 0; letter-spacing: -0.02em; }
+.tag { color: var(--muted); font-size: .95rem; margin: 2px 0 0; }
+
+/* Search */
+.search { display: grid; gap: 10px; }
+.search form { display: flex; flex-wrap: wrap; gap: 10px; }
+.field { flex: 1 1 260px; display: flex; align-items: center; gap: 8px; background: var(--surface);
+  border: 2px solid var(--line); border-radius: 999px; padding: 6px 8px 6px 20px; }
+.field:focus-within { border-color: var(--accent); }
+.field span { font: 800 1.4rem var(--display); color: var(--muted); }
+.field input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: 600 1.25rem var(--display);
+  font-variant-numeric: tabular-nums; padding: 8px 0; }
+.btn { border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 800; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink); transition: transform .15s; }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn.ghost { background: var(--surface); color: var(--ink); border: 2px solid var(--line); padding: 10px 20px; }
+.hint { color: var(--muted); font-size: .9rem; margin: 0; }
+.err { color: var(--danger); font-weight: 700; margin: 0; }
+
+/* Main stage */
+.stage { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+.canvas-box { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 18px;
+  display: grid; gap: 12px; justify-items: center; position: relative; }
+canvas { width: 100%; height: auto; border-radius: 14px; display: block; max-height: 72vh; object-fit: contain; }
+.canvas-box.tall canvas { width: auto; max-width: 100%; }
+.loading { position: absolute; inset: 18px; display: grid; place-items: center; border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 75%, transparent); font: 800 1.1rem var(--display); }
+.loading .dot { display: inline-block; animation: bounce 1s infinite; }
+.loading .dot:nth-child(2) { animation-delay: .15s } .loading .dot:nth-child(3) { animation-delay: .3s }
+@keyframes bounce { 50% { transform: translateY(-6px); } }
+
+.panel { display: grid; gap: 18px; }
+.card { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 20px; display: grid; gap: 14px; }
+.title-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+h2 { font: 800 1.8rem/1.1 var(--display); margin: 0; }
+h3 { font: 800 .8rem var(--body); margin: 0; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+.traits { display: flex; flex-wrap: wrap; gap: 8px; }
+.trait { border-radius: 14px; padding: 8px 12px; background: var(--chip); color: #2b2540; line-height: 1.2; }
+.trait small { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; opacity: .7; font-weight: 800; }
+.trait b { font-weight: 700; text-transform: capitalize; }
+.trait em { display: block; font-style: normal; font-size: .75rem; font-weight: 700; opacity: .75; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.trait.star { box-shadow: 0 0 0 3px #2b2540 inset; }
+.trait.star em::before { content: "★ "; }
+.rank { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.rank b { font: 800 1.3rem var(--display); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.tier { border-radius: 999px; padding: 4px 12px; font-weight: 800; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: #2b2540; background: var(--tier, #e2d6ff); }
+.meter { flex: 1 1 100%; height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #c6f2dc, #c9e4ff, #e2d6ff, #ffc8e1, #ffb36b); }
+.mini small { display: block; font: 700 .72rem var(--body); color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.links a { color: var(--accent); font-weight: 800; text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+
+.opt { display: grid; gap: 8px; }
+.swatches, .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--line); cursor: pointer; padding: 0; }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--accent); }
+.chip { border: 2px solid var(--line); background: transparent; border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 700; font-size: .92rem; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.text-in { border: 2px solid var(--line); border-radius: 12px; padding: 8px 12px; background: transparent; width: 100%; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Shelf */
+.shelf h2 { font-size: 1.4rem; }
+.shelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.mini { position: relative; background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 8px; cursor: pointer;
+  display: grid; gap: 6px; text-align: center; font: 800 .95rem var(--display); transition: transform .15s; }
+.mini:hover { transform: translateY(-3px) rotate(-1deg); }
+.mini img { border-radius: 12px; aspect-ratio: 1; object-fit: cover; width: 100%; background: var(--line); }
+.mini .x { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: var(--surface);
+  color: var(--muted); cursor: pointer; font-weight: 800; line-height: 1; }
+.empty { color: var(--muted); border: 2px dashed var(--line); border-radius: 18px; padding: 20px; text-align: center; }
+
+.day { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; background: linear-gradient(120deg, var(--pink), var(--sky));
+  color: #2b2540; border-radius: var(--radius); padding: 14px 18px; }
+.day img { width: 64px; height: 64px; border-radius: 14px; background: #fff; }
+.day div { flex: 1 1 200px; min-width: 0; }
+.day strong { font: 800 1.1rem var(--display); display: block; }
+.day .btn { background: #2b2540; color: #fff; }
+
+footer { color: var(--muted); font-size: .85rem; border-top: 2px solid var(--line); padding-top: 16px; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 700; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+<link rel="stylesheet" href="bold.css?v=1795023639">
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg-body" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffc8e1"/><stop offset=".5" stop-color="#e2d6ff"/><stop offset="1" stop-color="#c9e4ff"/>
+          </linearGradient>
+          <linearGradient id="lg-roof" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ffb36b"/><stop offset=".5" stop-color="#ffc8e1"/><stop offset="1" stop-color="#a48cff"/>
+          </linearGradient>
+        </defs>
+        <!-- the pad: a wobbly little house that is also a face -->
+        <path class="logo-body" d="M18 50 Q16 86 22 88 Q50 93 78 88 Q84 86 82 50 Q66 40 50 39 Q34 40 18 50Z" fill="url(#lg-body)" stroke="#2b2540" stroke-width="4" stroke-linejoin="round"/>
+        <path class="logo-roof" d="M10 52 Q30 26 50 12 Q70 26 90 52" fill="none" stroke="url(#lg-roof)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 52 Q30 26 50 12 Q70 26 90 52" fill="none" stroke="#2b2540" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".9" transform="translate(0 6)"/>
+        <g class="logo-eyes">
+          <ellipse cx="38" cy="62" rx="5" ry="6.5" fill="#2b2540"/>
+          <ellipse cx="62" cy="62" rx="5" ry="6.5" fill="#2b2540"/>
+          <circle cx="39.6" cy="59.8" r="1.8" fill="#fff"/>
+          <circle cx="63.6" cy="59.8" r="1.8" fill="#fff"/>
+        </g>
+        <path d="M42 75 Q50 82 58 75" fill="none" stroke="#2b2540" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="29" cy="72" r="4" fill="#ff8fb8" opacity=".55"/>
+        <circle cx="71" cy="72" r="4" fill="#ff8fb8" opacity=".55"/>
+        <path class="logo-spark" d="M86 14 l2.2 6 6 2.2 -6 2.2 -2.2 6 -2.2 -6 -6 -2.2 6 -2.2Z" fill="#ffd36b" stroke="#2b2540" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <h1 class="wordmark">Pastel <span>Pad</span></h1>
+        <p class="tag">Look up any Doodle, dress it up, save the picture.</p>
+      </div>
+    </div>
+    <nav class="tabs-nav" id="tabsNav" aria-label="Sections"></nav>
+    <div class="header-tools" id="headerTools"></div>
+  </header>
+
+  <main id="views">
+
+  <!-- 1. MY DOODLE: find it, see it, learn about it -->
+  <section class="view" data-view="home" aria-label="My Doodle">
+    <div class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">10,000 Doodles · find yours</p>
+      <h2 class="hero-title">Find your Doodle.<br><span class="hl">Make it pop.</span></h2>
+      <p class="hero-sub">Type a number to see its rank, its personality and every rare trait. Then dress it up for your phone or your X banner.</p>
+    <div class="search">
+    <form id="searchForm">
+      <label class="field" for="q">
+        <span>#</span>
+        <input id="q" inputmode="numeric" autocomplete="off" placeholder="Type your Doodle number, 0 to 9999" aria-label="Doodle number">
+        <button class="btn" type="submit">Find it</button>
+      </label>
+      <button class="btn ghost" type="button" id="randomBtn">Surprise me</button>
+    </form>
+    <p class="hint" id="status">Showing Doodle #1 as an example. Type your own number above.</p>
+    </div>
+    </div>
+    <div class="hero-art" id="heroArt" aria-hidden="true"></div>
+    </div>
+
+    <div class="doodle-grid">
+      <div class="card doodle-card" id="doodleCard">
+        <div class="doodle-frame"><img id="doodleImg" alt="Your Doodle"></div>
+        <div class="doodle-actions">
+          <button class="btn" type="button" data-go="studio">Dress it up</button>
+          <button class="btn ghost" type="button" data-go="rooms">Take it to a room</button>
+        </div>
+      </div>
+      <div class="card info" id="infoCard">
+        <div class="title-row">
+          <h2 id="name">Doodle #1</h2>
+          <button class="chip" type="button" id="saveBtn" aria-pressed="false">♡ Save to my shelf</button>
+        </div>
+        <div class="rank" id="rankBox" hidden>
+          <span class="tier" id="tier"></span>
+          <span><b id="rankNum"></b> <span class="muted">rarest of 10,000</span></span>
+          <div class="meter" aria-hidden="true"><i id="meterFill"></i></div>
+        </div>
+        <h3>Traits</h3>
+        <div class="traits" id="traits"></div>
+        <div class="links">
+          <a id="osLink" href="#" target="_blank" rel="noopener">View on OpenSea ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card persona" id="persona" hidden></div>
+
+  <section class="day" id="dayBox" aria-label="Doodle of the day">
+    <img id="dayImg" alt="">
+    <div><strong id="dayTitle">Doodle of the Day</strong><span>A new pick every day, chosen by the date.</span></div>
+    <button class="btn" type="button" id="dayBtn">Show me</button>
+  </section>
+
+  <section class="shelf card" aria-label="My shelf">
+    <div class="title-row">
+      <h2>My shelf</h2>
+      <span class="hint">Saved on this device</span>
+    </div>
+    <div class="shelf-grid" id="shelf"></div>
+  </section>
+  </section>
+
+  <!-- 2. STUDIO: make pictures -->
+  <section class="view" data-view="studio" aria-label="Studio" hidden>
+    <div class="view-head">
+      <div><p class="pkicker">Studio</p><h2>Make a picture of your Doodle</h2></div>
+      <div class="now-slot"></div>
+    </div>
+    <div class="stage">
+      <div class="canvas-box" id="canvasBox">
+      <canvas id="cv" width="1080" height="1080" aria-label="Your Doodle with the chosen backdrop"></canvas>
+      <div class="loading" id="loading" hidden><span>Fetching<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></div>
+    </div>
+      <div class="panel">
+      <div class="card wardrobe">
+        <h3>Wardrobe</h3>
+        <div class="opt">
+          <span>Size</span>
+          <div class="chips" id="sizeChips"></div>
+        </div>
+        <div class="opt">
+          <span>Backdrop color</span>
+          <div class="swatches" id="colorSw"></div>
+        </div>
+        <div class="opt">
+          <span>Pattern</span>
+          <div class="chips" id="patternChips"></div>
+        </div>
+        <div class="opt">
+          <span>Frame</span>
+          <div class="chips" id="frameChips"></div>
+        </div>
+        <div class="opt">
+          <label for="caption">Caption (optional)</label>
+          <input class="text-in" id="caption" maxlength="28" placeholder="gm frens">
+        </div>
+        <div class="opt">
+          <span>Stickers <span class="muted">· tap one to add, drag it on the picture</span></span>
+          <div class="stickers" id="stickerTray"></div>
+          <div class="sticker-edit" id="stickerEdit" hidden>
+            <label for="stickerSize">Size</label>
+            <input type="range" id="stickerSize" min="4" max="45" value="14">
+            <label for="stickerTurn">Turn</label>
+            <input type="range" id="stickerTurn" min="-45" max="45" value="0">
+            <button class="chip" type="button" id="stickerDel">Remove</button>
+            <button class="chip" type="button" id="stickerClear">Clear all</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" id="dlBtn">Download picture</button>
+          <button class="btn ghost" type="button" id="copyBtn">Copy link to this Doodle</button>
+        </div>
+        <div class="share" id="shareRow">
+          <span class="muted">Share</span>
+          <button class="chip" type="button" id="shareNative" hidden>Share picture</button>
+          <a class="chip" id="shareX" href="#" target="_blank" rel="noopener">Post on X</a>
+          <button class="chip" type="button" id="shareCopy">Copy post text</button>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. ROOMS: hang out with music -->
+  <section class="view" data-view="rooms" aria-label="Doodle Rooms" hidden>
+    <section class="card rooms" id="rooms" aria-label="Doodle Rooms"></section>
+  </section>
+
+  <!-- 4. EXPLORE: rarity and traits -->
+  <section class="view" data-view="explore" aria-label="Explore" hidden>
+    <section class="card explore" id="explore" aria-label="Trait explorer"></section>
+  </section>
+
+  <!-- 5. PLAY: game, stamps, badges -->
+  <section class="view" data-view="play" aria-label="Play" hidden>
+    <section class="card game" id="game" aria-label="Higher or Lower"></section>
+    <section class="card badges" id="badges" aria-label="Stamps and badges"></section>
+  </section>
+
+  </main>
+
+  <footer>
+    Pastel Pad is an independent fan page and isn't affiliated with or endorsed by Doodles.
+    Artwork and trait data load from the collection's public metadata on IPFS.
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script src="rarity.js?v=1795023639"></script>
+
+<script>
+const CONTRACT = "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e";
+const META_CID = "QmPMc4tcBsMqLRuCQtPmPe84bpSjrC3Ky7t3JWuHXYB4aS";
+const GATEWAYS = ["https://ipfs.raribleuserdata.com/ipfs/", "https://ipfs.filebase.io/ipfs/", "https://gateway.pinata.cloud/ipfs/", "https://4everland.io/ipfs/"];
+const MAX_ID = 9999;
+
+const COLORS = ["#ffc8e1", "#c9e4ff", "#c6f2dc", "#fff1b8", "#e2d6ff", "#ffd9c2", "#2b2540", "#ffffff"];
+const PATTERNS = ["None", "Dots", "Stripes", "Checks", "Stars"];
+const FRAMES = ["None", "Rounded", "Polaroid", "Sticker"];
+const SIZES = [{ k: "Profile pic", w: 1080, h: 1080 }, { k: "Phone wallpaper", w: 1170, h: 2532 }, { k: "Banner", w: 1500, h: 500 }];
+const CHIP_COLORS = ["#ffc8e1", "#c9e4ff", "#c6f2dc", "#fff1b8", "#e2d6ff", "#ffd9c2"];
+
+const state = { id: 1, meta: null, img: null, cut: null, bg: null, color: "match", pattern: "Dots", frame: "Rounded", size: 0, caption: "" };
+const $ = (s) => document.getElementById(s);
+const metaCache = new Map();
+const emit = (n, d) => document.dispatchEvent(new CustomEvent("pp:" + n, { detail: d || {} }));
+
+/* ---------- storage (safe) ---------- */
+function load(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } }
+function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+let shelf = load("pastelpad.shelf", load("doodleden.shelf", []));
+
+/* ---------- data ---------- */
+const ipfsPath = (uri) => uri.replace(/^ipfs:\/\//, "");
+async function fetchFromGateways(path, as) {
+  let lastErr;
+  for (const g of GATEWAYS) {
+    try {
+      const r = await fetch(g + path);
+      if (!r.ok) throw new Error(r.status);
+      return as === "json" ? await r.json() : g + path;
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr;
+}
+async function getMeta(id) {
+  if (metaCache.has(id)) return metaCache.get(id);
+  const m = await fetchFromGateways(`${META_CID}/${id}`, "json");
+  metaCache.set(id, m);
+  return m;
+}
+function imageUrl(meta, gw = 0) { return GATEWAYS[gw] + ipfsPath(meta.image); }
+// Load a Doodle picture, moving on to the next image server if one fails
+function setDoodleImg(img, meta, gw = 0) {
+  img.classList.add("dimg");
+  img.onerror = () => { if (gw + 1 < GATEWAYS.length) setDoodleImg(img, meta, gw + 1); else img.classList.add("failed"); };
+  img.src = imageUrl(meta, gw);
+}
+function loadImage(meta) {
+  return new Promise((resolve, reject) => {
+    let gw = 0;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => { gw++; if (gw < GATEWAYS.length) img.src = imageUrl(meta, gw); else reject(new Error("image")); };
+    img.src = imageUrl(meta, 0);
+  });
+}
+
+/* ---------- lookup ---------- */
+async function show(id, { quiet } = {}) {
+  id = Number(id);
+  if (!Number.isInteger(id) || id < 0 || id > MAX_ID) { setStatus(`Doodle numbers go from 0 to ${MAX_ID}. Try another number.`, true); return; }
+  $("loading").hidden = false;
+  setStatus(`Looking up Doodle #${id}…`);
+  try {
+    const meta = await getMeta(id);
+    const img = await loadImage(meta);
+    Object.assign(state, { id, meta, img }, cutout(img));
+    renderInfo(); draw();
+    emit("found", { id, quiet: !!quiet });
+    setStatus(quiet ? "Showing Doodle #1 as an example. Type your own number above." : `Found Doodle #${id}.`);
+    try { history.replaceState(null, "", "#" + id); } catch {}
+  } catch (e) {
+    setStatus("Couldn't reach the image servers just now. Check your connection and press Find it again.", true);
+  } finally { $("loading").hidden = true; }
+}
+function setStatus(msg, isErr) { const s = $("status"); s.textContent = msg; s.className = isErr ? "err" : "hint"; }
+
+/* ---------- rarity (from rarity.js, built from all 10,000 Doodles) ---------- */
+const R = window.DOODLE_RARITY || null;
+const TIERS = [
+  { max: 0.01, name: "Legendary", color: "#ffb36b" },
+  { max: 0.05, name: "Epic", color: "#ffc8e1" },
+  { max: 0.15, name: "Rare", color: "#e2d6ff" },
+  { max: 0.40, name: "Uncommon", color: "#c9e4ff" },
+  { max: 1.01, name: "Common", color: "#c6f2dc" },
+];
+const rankOf = (id) => (R ? R.rank[id] : null);
+const tierOf = (rank) => TIERS.find((t) => rank / R.n <= t.max);
+function traitCount(type, value) {
+  if (!R || !R.values[type]) return null;
+  const k = R.values[type].indexOf(value);
+  return k < 0 ? null : R.counts[type][k];
+}
+function pctText(count) {
+  const p = (count / R.n) * 100;
+  return p < 1 ? `${p.toFixed(2)}% have this` : `${p < 10 ? p.toFixed(1) : Math.round(p)}% have this`;
+}
+
+function renderInfo() {
+  const { id, meta } = state;
+  $("name").textContent = meta.name || `Doodle #${id}`;
+  $("traits").innerHTML = "";
+  const attrs = meta.attributes || [];
+  const counts = attrs.map((a) => traitCount(a.trait_type, a.value));
+  const known = counts.filter((c) => c != null);
+  const rarest = known.length ? Math.min(...known) : null;
+  attrs.forEach((a, i) => {
+    const d = document.createElement("div");
+    d.className = "trait"; d.style.setProperty("--chip", CHIP_COLORS[i % CHIP_COLORS.length]);
+    d.innerHTML = `<small></small><b></b><em></em>`;
+    d.querySelector("small").textContent = a.trait_type; d.querySelector("b").textContent = a.value;
+    d.dataset.type = a.trait_type; d.dataset.value = a.value; d.tabIndex = 0; d.setAttribute("role", "button");
+    d.setAttribute("aria-label", `See every Doodle with ${a.value} ${a.trait_type}`);
+    const c = counts[i];
+    if (c != null) {
+      d.querySelector("em").textContent = pctText(c);
+      d.title = `${c.toLocaleString()} of ${R.n.toLocaleString()} Doodles`;
+      if (c === rarest) d.classList.add("star");
+    } else d.querySelector("em").remove();
+    $("traits").appendChild(d);
+  });
+  const rank = rankOf(id);
+  $("rankBox").hidden = rank == null;
+  if (rank != null) {
+    const t = tierOf(rank);
+    $("tier").textContent = t.name; $("tier").style.setProperty("--tier", t.color);
+    $("rankNum").textContent = `#${rank.toLocaleString()}`;
+    $("meterFill").style.width = `${Math.max(3, 100 - ((rank - 1) / R.n) * 100)}%`;
+  }
+  $("osLink").href = `https://opensea.io/assets/ethereum/${CONTRACT}/${id}`;
+  $("q").value = id;
+  updateSaveBtn();
+}
+
+/* ---------- drawing ---------- */
+function isDark(hex) { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 < 128; }
+function drawPattern(ctx, w, h, kind, base) {
+  const ink = isDark(base) ? "rgba(255,255,255,.14)" : "rgba(43,37,64,.10)";
+  ctx.fillStyle = ink; ctx.strokeStyle = ink;
+  const s = Math.round(Math.min(w, h) / 14);
+  if (kind === "Dots") { for (let y = s / 2; y < h; y += s) for (let x = (y / s) % 2 ? s : s / 2; x < w; x += s) { ctx.beginPath(); ctx.arc(x, y, s * .14, 0, 7); ctx.fill(); } }
+  if (kind === "Stripes") { ctx.lineWidth = s * .35; for (let x = -h; x < w + h; x += s) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + h, h); ctx.stroke(); } }
+  if (kind === "Checks") { for (let y = 0; y < h; y += s) for (let x = 0; x < w; x += s) if (((x + y) / s) % 2 === 0) ctx.fillRect(x, y, s, s); }
+  if (kind === "Stars") { for (let y = s; y < h; y += s * 1.6) for (let x = ((y / s) % 2 ? s * .8 : s * 1.6); x < w; x += s * 1.6) star(ctx, x, y, s * .28); }
+}
+function star(ctx, cx, cy, r) { ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = Math.PI / 5 * i - Math.PI / 2, rr = i % 2 ? r * .45 : r; ctx.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); }
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+
+/* ---------- shared drawing helpers ---------- */
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (c) => Math.max(0, Math.min(255, Math.round(amt < 0 ? c * (1 + amt) : c + (255 - c) * amt)));
+  return "#" + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(f).map((c) => c.toString(16).padStart(2, "0")).join("");
+}
+const inkFor = (bg) => isDark(bg) ? "#ffffff" : "#2b2540";
+const FONT = (wt, px) => `${wt} ${Math.round(px)}px "Bricolage Grotesque", system-ui, sans-serif`;
+const BODYFONT = (wt, px) => `${wt} ${Math.round(px)}px "Nunito", system-ui, sans-serif`;
+
+// Big soft blobs in tones of the backdrop color
+function drawBlobs(ctx, w, h, base, spots) {
+  const tone = isDark(base) ? shade(base, 0.12) : shade(base, -0.08);
+  const light = isDark(base) ? shade(base, 0.22) : shade(base, 0.45);
+  spots.forEach(([x, y, r, useLight]) => {
+    ctx.fillStyle = useLight ? light : tone;
+    ctx.beginPath();
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2, rr = r * (1 + 0.08 * Math.sin(a * 3 + x) + 0.05 * Math.cos(a * 5 + y));
+      ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    ctx.fill();
+  });
+}
+// Hand-drawn style squiggle
+function squiggle(ctx, x, y, len, amp, lw, color, rot = 0) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.beginPath();
+  for (let i = 0; i <= 60; i++) { const t = i / 60; ctx.lineTo(t * len, Math.sin(t * Math.PI * 4) * amp); }
+  ctx.stroke(); ctx.restore();
+}
+function sparkle(ctx, x, y, r, color) {
+  ctx.fillStyle = color; ctx.beginPath();
+  for (let i = 0; i < 8; i++) { const a = Math.PI / 4 * i - Math.PI / 2, rr = i % 2 ? r * .28 : r; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  ctx.closePath(); ctx.fill();
+}
+// Trait sticker: small label over a bold value, on a tilted pill
+function traitSticker(ctx, x, y, label, value, bg, rot, fs) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  ctx.font = FONT(800, fs); const vw = ctx.measureText(value).width;
+  ctx.font = BODYFONT(800, fs * .5); const lw = ctx.measureText(label.toUpperCase()).width;
+  const pw = Math.max(vw, lw) + fs * 1.3, ph = fs * 2.3;
+  ctx.shadowColor = "rgba(30,20,60,.22)"; ctx.shadowBlur = fs * .5; ctx.shadowOffsetY = fs * .18;
+  ctx.fillStyle = "#ffffff"; roundRect(ctx, -pw / 2 - fs * .14, -ph / 2 - fs * .14, pw + fs * .28, ph + fs * .28, ph * .42); ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.fillStyle = bg; roundRect(ctx, -pw / 2, -ph / 2, pw, ph, ph * .38); ctx.fill();
+  ctx.fillStyle = "#2b2540"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.globalAlpha = .65; ctx.font = BODYFONT(800, fs * .5); ctx.fillText(label.toUpperCase(), 0, -fs * .5);
+  ctx.globalAlpha = 1; ctx.font = FONT(800, fs); ctx.fillText(value, 0, fs * .32);
+  ctx.restore();
+}
+const cap = (s) => String(s).replace(/\b\w/g, (c) => c.toUpperCase());
+
+// The Doodle itself, in the chosen frame, centered on (cx, cy), rotated
+function drawDoodle(ctx, cx, cy, side, rot = 0) {
+  const x = -side / 2, y = -side / 2, pad = side * .05;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+  ctx.shadowColor = "rgba(30,20,60,.28)"; ctx.shadowBlur = side * .06; ctx.shadowOffsetY = side * .025;
+  if (state.frame === "Polaroid") {
+    ctx.fillStyle = "#fff"; ctx.fillRect(x - pad, y - pad, side + pad * 2, side + pad * 4.5);
+    ctx.shadowColor = "transparent"; ctx.drawImage(state.img, x, y, side, side);
+  } else if (state.frame === "Sticker") {
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(0, 0, side / 2 + pad * 1.2, 0, 7); ctx.fill();
+    ctx.shadowColor = "transparent"; ctx.beginPath(); ctx.arc(0, 0, side / 2, 0, 7); ctx.clip(); ctx.drawImage(state.img, x, y, side, side);
+  } else if (state.frame === "Rounded") {
+    ctx.fillStyle = "#fff"; roundRect(ctx, x - pad, y - pad, side + pad * 2, side + pad * 2, side * .12); ctx.fill();
+    ctx.shadowColor = "transparent"; roundRect(ctx, x, y, side, side, side * .09); ctx.clip(); ctx.drawImage(state.img, x, y, side, side);
+  } else {
+    roundRect(ctx, x, y, side, side, side * .04); ctx.fill(); ctx.shadowColor = "transparent"; ctx.clip(); ctx.drawImage(state.img, x, y, side, side);
+  }
+  ctx.restore();
+}
+
+/* ---------- cut the Doodle out of its background ----------
+   Flood-fills from the top and side edges, spreading only between neighbouring
+   pixels of nearly the same colour, so flat and gradient backgrounds both lift off
+   while the thick black outline stops the fill. */
+function cutout(img) {
+  const N = 900, c = document.createElement("canvas"); c.width = c.height = N;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(img, 0, 0, N, N);
+  let id; try { id = x.getImageData(0, 0, N, N); } catch { return { cut: null, bg: null }; }
+  const d = id.data, seen = new Uint8Array(N * N), stack = [];
+  const px = (i) => [d[i * 4], d[i * 4 + 1], d[i * 4 + 2]];
+  const diff = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
+  const corner = px(0);
+  for (let i = 0; i < N; i++) stack.push(i);                        // top row
+  for (let y = 0; y < N; y++) for (const xx of [0, N - 1]) {         // side columns that still look like background
+    const i = y * N + xx; if (diff(px(i), corner) < 60) stack.push(i);
+  }
+  while (stack.length) {
+    const i = stack.pop(); if (seen[i]) continue; seen[i] = 1;
+    const a = px(i), xx = i % N, y = (i / N) | 0;
+    const nb = [xx > 0 && i - 1, xx < N - 1 && i + 1, y > 0 && i - N, y < N - 1 && i + N];
+    for (const j of nb) if (j !== false && !seen[j] && diff(px(j), a) < 14) stack.push(j);
+  }
+  // Sample background colours (top and lower-middle of the side) before clearing
+  const avg = (idxs) => { const s = [0, 0, 0]; idxs.forEach((i) => { const p = px(i); s[0] += p[0]; s[1] += p[1]; s[2] += p[2]; }); return "#" + s.map((v) => Math.round(v / idxs.length).toString(16).padStart(2, "0")).join(""); };
+  const top = avg([5 * N + 5, 5 * N + N - 6, 5 * N + (N >> 1)]);
+  const lowI = [Math.round(N * .7) * N + 4, Math.round(N * .7) * N + N - 5].filter((i) => seen[i]);
+  const low = lowI.length ? avg(lowI) : top;
+  // Clear background and soften the edge by one pixel
+  for (let i = 0; i < N * N; i++) if (seen[i]) d[i * 4 + 3] = 0;
+  for (let i = N; i < N * N - N; i++) {
+    if (seen[i]) continue;
+    const n = seen[i - 1] + seen[i + 1] + seen[i - N] + seen[i + N];
+    if (n >= 2) d[i * 4 + 3] = 140;
+  }
+  x.putImageData(id, 0, 0);
+  return { cut: c, bg: { top, low } };
+}
+
+/* backdrop colour helpers: "match" = the Doodle's own background */
+const baseColor = () => (state.color === "match" ? (state.bg ? state.bg.top : "#e2d6ff") : state.color);
+function paintBackdrop(ctx, w, h) {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  if (state.color === "match" && state.bg) { g.addColorStop(0, state.bg.top); g.addColorStop(1, state.bg.low); }
+  else { const b = baseColor(); g.addColorStop(0, shade(b, isDark(b) ? 0.08 : 0.25)); g.addColorStop(1, b); }
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+}
+function glow(ctx, x, y, r, base) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, isDark(base) ? "rgba(255,255,255,.16)" : "rgba(255,255,255,.55)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+// Light pattern: only fades in toward the top so it never fights the Doodle
+function softPattern(ctx, w, h, base) {
+  if (state.pattern === "None") return;
+  ctx.save();
+  const m = ctx.createLinearGradient(0, 0, 0, h); m.addColorStop(0, "rgba(0,0,0,1)"); m.addColorStop(.75, "rgba(0,0,0,0)");
+  const tmp = document.createElement("canvas"); tmp.width = w; tmp.height = h;
+  const t = tmp.getContext("2d"); drawPattern(t, w, h, state.pattern, base);
+  t.globalCompositeOperation = "destination-in"; t.fillStyle = m; t.fillRect(0, 0, w, h);
+  ctx.drawImage(tmp, 0, 0); ctx.restore();
+}
+// The Doodle standing on the bottom edge (cutout if we have it, else the square art)
+function standingDoodle(ctx, cx, bottom, size) {
+  const src = state.cut || state.img;
+  ctx.save();
+  ctx.shadowColor = "rgba(30,20,60,.22)"; ctx.shadowBlur = size * .03; ctx.shadowOffsetY = -size * .005;
+  ctx.drawImage(src, cx - size / 2, bottom - size, size, size);
+  ctx.restore();
+}
+
+/* ---------- phone wallpaper: big Doodle portrait, top kept clear for the clock ---------- */
+function drawWallpaper(ctx, w, h) {
+  const base = baseColor(), ink = inkFor(base);
+  paintBackdrop(ctx, w, h);
+  softPattern(ctx, w, h, base);
+  glow(ctx, w / 2, h * .62, w * .85, base);
+  standingDoodle(ctx, w / 2, h, w * 1.26);
+
+  const sp = isDark(base) ? "#fff1b8" : "#ffffff";
+  [[w * .14, h * .44, w * .03], [w * .86, h * .4, w * .024], [w * .8, h * .5, w * .014]].forEach(([x, y, r]) => sparkle(ctx, x, y, r, sp));
+
+  // Caption sits under where the lock-screen widgets go, above the head
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  if (state.caption) {
+    ctx.font = FONT(800, w * .085); ctx.fillStyle = ink;
+    ctx.fillText(state.caption, w / 2, h * .32);
+  }
+  ctx.font = BODYFONT(800, w * .03); ctx.fillStyle = ink; ctx.globalAlpha = .55;
+  ctx.fillText("#" + state.id, w / 2, state.caption ? h * .352 : h * .34);
+  ctx.globalAlpha = 1;
+}
+
+/* ---------- banner: Doodle on the right, name in the middle, avatar corner left clear ---------- */
+function drawBanner(ctx, w, h) {
+  const base = baseColor(), ink = inkFor(base);
+  paintBackdrop(ctx, w, h);
+  softPattern(ctx, w, h, base);
+  glow(ctx, w * .8, h * .7, h * 1.1, base);
+  standingDoodle(ctx, w * .8, h + h * .02, h * 1.12);
+
+  const tx = w * .34;
+  ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = ink;
+  const brk = rankOf(state.id);
+  ctx.font = BODYFONT(800, h * .05); ctx.globalAlpha = .6;
+  ctx.fillText("DOODLE" + (brk != null ? "  ·  RANK " + brk.toLocaleString() : ""), tx, h * .3);
+  ctx.globalAlpha = 1;
+  ctx.font = FONT(800, h * .3); ctx.fillText("#" + state.id, tx - h * .012, h * .6);
+  if (state.caption) { ctx.font = FONT(800, h * .09); ctx.globalAlpha = .85; ctx.fillText(state.caption, tx, h * .76); ctx.globalAlpha = 1; }
+
+  const sp = isDark(base) ? "#fff1b8" : "#ffffff";
+  [[w * .63, h * .22, h * .045], [w * .96, h * .2, h * .035], [w * .3, h * .2, h * .025]].forEach(([x, y, r]) => sparkle(ctx, x, y, r, sp));
+}
+
+function draw() {
+  drawBase();
+  const cv = $("cv");
+  if (window.PP_afterDraw) window.PP_afterDraw(cv.getContext("2d"), cv.width, cv.height);
+}
+function drawBase() {
+  const { w, h } = SIZES[state.size];
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  cv.width = w; cv.height = h;
+  $("canvasBox").classList.toggle("tall", h > w);
+  $("frameChips").closest(".opt").hidden = state.size !== 0;
+  paintBackdrop(ctx, w, h);
+  if (state.img && state.meta && state.size === 1) return drawWallpaper(ctx, w, h);
+  if (state.img && state.meta && state.size === 2) return drawBanner(ctx, w, h);
+  drawPattern(ctx, w, h, state.pattern, baseColor());
+  if (!state.img) return;
+
+  const capH = state.caption ? Math.min(w, h) * .12 : 0;
+  let side = Math.min(w * .78, (h - capH) * .78);
+  if (state.frame === "None") side = Math.min(w * .86, (h - capH) * .86);
+  const cx = w / 2, cy = (h - capH) / 2 + (state.caption ? capH * .15 : 0);
+  let x = cx - side / 2, y = cy - side / 2;
+  const pad = side * .05;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(30,20,60,.25)"; ctx.shadowBlur = side * .05; ctx.shadowOffsetY = side * .02;
+  if (state.frame === "Polaroid") {
+    ctx.translate(cx, cy); ctx.rotate(-0.035); ctx.translate(-cx, -cy);
+    ctx.fillStyle = "#fff"; ctx.fillRect(x - pad, y - pad, side + pad * 2, side + pad * 4.5);
+    ctx.shadowColor = "transparent"; ctx.drawImage(state.img, x, y, side, side);
+  } else if (state.frame === "Sticker") {
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(cx, cy, side / 2 + pad * 1.2, 0, 7); ctx.fill();
+    ctx.shadowColor = "transparent"; ctx.beginPath(); ctx.arc(cx, cy, side / 2, 0, 7); ctx.clip(); ctx.drawImage(state.img, x, y, side, side);
+  } else if (state.frame === "Rounded") {
+    ctx.fillStyle = "#fff"; roundRect(ctx, x - pad, y - pad, side + pad * 2, side + pad * 2, side * .12); ctx.fill();
+    ctx.shadowColor = "transparent"; roundRect(ctx, x, y, side, side, side * .09); ctx.clip(); ctx.drawImage(state.img, x, y, side, side);
+  } else {
+    ctx.shadowColor = "transparent"; roundRect(ctx, x, y, side, side, side * .04); ctx.clip(); ctx.drawImage(state.img, x, y, side, side);
+  }
+  ctx.restore();
+
+  if (state.caption) {
+    const fs = Math.round(Math.min(w, h) * .075);
+    ctx.font = `800 ${fs}px "Bricolage Grotesque", system-ui, sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillStyle = isDark(baseColor()) ? "#ffffff" : "#2b2540";
+    const below = state.frame === "Polaroid" ? cy + side / 2 + pad * 3 : h - capH * .75;
+    ctx.fillText(state.caption, cx, Math.min(below + (state.frame === "Polaroid" ? capH * .6 : 0), h - fs * .7));
+  }
+}
+
+/* ---------- controls ---------- */
+function chipGroup(el, items, getLabel, isOn, onPick) {
+  el.innerHTML = "";
+  items.forEach((it, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = getLabel(it);
+    b.setAttribute("aria-pressed", isOn(it, i)); b.onclick = () => { onPick(it, i); chipGroup(el, items, getLabel, isOn, onPick); draw(); emit("option", { group: el.id, value: getLabel(it) }); };
+    el.appendChild(b);
+  });
+}
+function buildControls() {
+  chipGroup($("sizeChips"), SIZES, (s) => s.k, (s, i) => i === state.size, (s, i) => state.size = i);
+  chipGroup($("patternChips"), PATTERNS, (p) => p, (p) => p === state.pattern, (p) => state.pattern = p);
+  chipGroup($("frameChips"), FRAMES, (f) => f, (f) => f === state.frame, (f) => state.frame = f);
+  const sw = $("colorSw"); sw.innerHTML = "";
+  ["match", ...COLORS].forEach((c) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "sw" + (c === "match" ? " match" : "");
+    b.style.background = c === "match" ? "conic-gradient(#ffc8e1, #c9e4ff, #c6f2dc, #fff1b8, #ffc8e1)" : c;
+    b.setAttribute("aria-label", c === "match" ? "Match my Doodle's background" : "Backdrop " + c);
+    if (c === "match") b.title = "Match my Doodle";
+    b.setAttribute("aria-pressed", c === state.color);
+    b.onclick = () => { state.color = c; buildControls(); draw(); emit("option", { group: "colorSw", value: c }); };
+    sw.appendChild(b);
+  });
+}
+
+/* ---------- shelf ---------- */
+function updateSaveBtn() {
+  const on = shelf.includes(state.id);
+  $("saveBtn").setAttribute("aria-pressed", on);
+  $("saveBtn").textContent = on ? "♥ On my shelf" : "♡ Save to my shelf";
+}
+async function renderShelf() {
+  const el = $("shelf"); el.innerHTML = "";
+  if (!shelf.length) { el.innerHTML = `<div class="empty">Save the Doodles you own and they'll wait here for you next time.</div>`; el.style.display = "block"; return; }
+  el.style.display = "";
+  for (const id of shelf) {
+    const card = document.createElement("div");
+    card.className = "mini"; card.tabIndex = 0;
+    const rk = rankOf(id);
+    card.innerHTML = `<img alt="Doodle #${id}"><span>#${id}${rk != null ? `<small>Rank ${rk.toLocaleString()}</small>` : ""}</span><button class="x" type="button" aria-label="Remove #${id}">×</button>`;
+    card.onclick = (e) => { if (e.target.classList.contains("x")) return; show(id); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    card.onkeydown = (e) => { if (e.key === "Enter") show(id); };
+    card.querySelector(".x").onclick = () => { shelf = shelf.filter((n) => n !== id); store("pastelpad.shelf", shelf); renderShelf(); updateSaveBtn(); };
+    el.appendChild(card);
+    getMeta(id).then((m) => { setDoodleImg(card.querySelector("img"), m); }).catch(() => {});
+  }
+}
+
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
+
+/* ---------- doodle of the day ---------- */
+function dayId() { const d = new Date(), s = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); let x = s; x = (x ^ 61) ^ (x >>> 16); x = x + (x << 3); x ^= x >>> 4; x = Math.imul(x, 0x27d4eb2d); x ^= x >>> 15; return Math.abs(x) % (MAX_ID + 1); }
+
+/* ---------- wire up ---------- */
+$("searchForm").onsubmit = (e) => { e.preventDefault(); const v = $("q").value.replace(/[^0-9]/g, ""); if (v === "") { setStatus("Type a number first, like 1234.", true); return; } show(v); };
+$("randomBtn").onclick = () => show(Math.floor(Math.random() * (MAX_ID + 1)));
+$("dayBtn").onclick = () => { show(dayId()); emit("day"); };
+$("saveBtn").onclick = () => {
+  if (shelf.includes(state.id)) shelf = shelf.filter((n) => n !== state.id); else shelf = [state.id, ...shelf].slice(0, 60);
+  store("pastelpad.shelf", shelf); updateSaveBtn(); renderShelf();
+  toast(shelf.includes(state.id) ? `Saved #${state.id} to your shelf` : `Removed #${state.id}`);
+  emit("saved", { count: shelf.length });
+};
+$("caption").oninput = (e) => { state.caption = e.target.value; draw(); };
+$("dlBtn").onclick = () => {
+  try {
+    const a = document.createElement("a");
+    a.download = `pastelpad-doodle-${state.id}-${SIZES[state.size].k.toLowerCase().replace(/\s+/g, "-")}.png`;
+    window.PP_exporting = true; draw();
+    a.href = $("cv").toDataURL("image/png");
+    window.PP_exporting = false; draw();
+    a.click(); toast("Picture downloaded"); emit("download");
+  } catch { toast("Download didn't work in this browser"); }
+};
+$("copyBtn").onclick = async () => {
+  const url = location.href.split("#")[0] + "#" + state.id;
+  try { await navigator.clipboard.writeText(url); toast("Link copied"); } catch { toast(url); }
+};
+window.addEventListener("hashchange", () => { const n = location.hash.slice(1); if (/^\d+$/.test(n) && Number(n) !== state.id) show(n); });
+
+buildControls(); draw(); renderShelf();
+const d = dayId(); $("dayTitle").textContent = `Doodle of the Day: #${d}`;
+getMeta(d).then((m) => { setDoodleImg($("dayImg"), m); $("dayImg").alt = `Doodle #${d}`; }).catch(() => {});
+const start = location.hash.slice(1);
+if (/^\d+$/.test(start)) show(start); else show(1, { quiet: true });
+if (document.fonts) document.fonts.ready.then(draw);
+</script>
+<script src="personality.js?v=1795023639"></script>
+<script src="fun.js?v=1795023639"></script>
+<script src="explore.js?v=1795023639"></script>
+<script src="hero.js?v=1795023639"></script>
+<script src="music.js?v=1795023639"></script>
+<script src="scenes.js?v=1795023639"></script>
+<script src="rooms.js?v=1795023639"></script>
+<script src="nav.js?v=1795023639"></script>
+</body>
+</html>
