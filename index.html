@@ -419,7 +419,7 @@ async function show(id, { quiet } = {}) {
     renderInfo(); draw();
     emit("found", { id, quiet: !!quiet });
     setStatus(quiet ? "Showing Doodle #1 as an example. Type your own number above." : `Found Doodle #${id}.`);
-    try { history.replaceState(null, "", "#" + id); } catch {}
+    // (the address bar stays clean: no #number added)
   } catch (e) {
     setStatus("Couldn't reach the image servers just now. Check your connection and press Find it again.", true);
   } finally { $("loading").hidden = true; }
